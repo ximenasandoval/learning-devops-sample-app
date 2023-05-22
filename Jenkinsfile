@@ -1,20 +1,17 @@
-pipeline {
-    agent {
-        kubernetes {
-            defaultContainer 'jnlp'
-            idleMinutes 1
-        }
-    }
-    stages {
-        stage('Sample Stage') {
-            parallel {
-            stage('this runs in a pod') {
-                steps {
-                    container('jnlp') {
-                        sh 'uptime'
-                        }
-                    }
-                }
+podTemplate(label: 'mypod', containers: [
+    containerTemplate(name: 'docker', image: 'docker', command: 'cat', ttyEnabled: true)
+  ],
+  volumes: [
+    hostPathVolume(mountPath: '/var/run/docker.sock', hostPath: '/var/run/docker.sock'),
+  ]
+  ) {
+    node('mypod') {
+        stage('Check running containers') {
+            container('docker') {
+                // example to show you can run docker commands when you mount the socket
+                sh 'hostname'
+                sh 'hostname -i'
+                sh 'docker ps'
             }
         }
     }
