@@ -1,6 +1,7 @@
 podTemplate(label: 'mypod', containers: [
     containerTemplate(name: 'docker', image: 'docker', command: 'cat', ttyEnabled: true),
-    containerTemplate(name: 'git', image: 'alpine/git', ttyEnabled: true, command: 'cat')
+    containerTemplate(name: 'git', image: 'alpine/git', ttyEnabled: true, command: 'cat'),
+    containerTemplate(name: 'python', image: 'python3', ttyEnabled: true, command: 'bash')
   ],
   volumes: [
     hostPathVolume(mountPath: '/var/run/docker.sock', hostPath: '/var/run/docker.sock'),
@@ -17,8 +18,11 @@ podTemplate(label: 'mypod', containers: [
             }
             container('git') {
                 sh 'git clone https://github.com/ximenasandoval/learning-devops-sample-app.git'
-                sh 'cd learning-devops-sample-app'
-                sh 'ls -a'
+            }
+            container('python') {
+                dir('learning-devops-sample-app/') {
+                    sh 'ls -a'
+                }
             }
         }
     }
