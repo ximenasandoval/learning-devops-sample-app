@@ -9,18 +9,19 @@ podTemplate(label: 'mypod', containers: [
   ) {
     node('mypod') {
         stage('Check running containers') {
-            container('docker') {
-                // example to show you can run docker commands when you mount the socket
-                sh 'hostname'
-                sh 'hostname -i'
-                sh 'docker ps'
-                sh 'pwd'
-            }
             container('git') {
                 sh 'git clone https://github.com/ximenasandoval/learning-devops-sample-app.git'
             }
             container('python') {
                 dir('learning-devops-sample-app/') {
+                    sh 'ls -a'
+                    sh 'echo This is were a test would be run'
+                }
+            }
+            container('docker') {
+                dir('learning-devops-sample-app/') {
+                    sh 'echo This is were the image will be built'
+                    sh 'docker ps'
                     sh 'ls -a'
                 }
             }
