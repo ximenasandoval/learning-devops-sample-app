@@ -1,14 +1,20 @@
 pipeline {
     agent {
-        docker {
-            image 'python:3'
-            args '-p 5000:5000'
+        kubernetes {
+            defaultContainer 'jnlp'
+            idleMinutes 1
         }
     }
     stages {
-        stage('Build') {
-            steps {
-                sh 'echo Building!'
+        stage('Sample Stage') {
+            parallel {
+            stage('this runs in a pod') {
+                steps {
+                    container('jnlp') {
+                        sh 'uptime'
+                        }
+                    }
+                }
             }
         }
     }
