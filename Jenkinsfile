@@ -12,6 +12,7 @@ podTemplate(label: 'mypod', containers: [
                 sh 'hostname'
                 sh 'hostname -i'
                 sh 'docker ps'
+                sh 'pwd'
             }
         }
     }
