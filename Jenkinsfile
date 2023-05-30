@@ -1,28 +1,20 @@
-podTemplate(label: 'jenkins-worker', containers: [
-    containerTemplate(name: 'docker', image: 'docker', command: 'cat', ttyEnabled: true),
-    containerTemplate(name: 'git', image: 'alpine/git', ttyEnabled: true, command: 'cat'),
-    containerTemplate(name: 'python', image: 'python:3', ttyEnabled: true, command: 'bash')
-  ],
-  volumes: [
-    hostPathVolume(mountPath: '/var/run/docker.sock', hostPath: '/var/run/docker.sock'),
-  ]
-  ) {
+podTemplate(
+    label: 'jenkins-worker', 
+    imagePullSecrets: ["regcred"], 
+    containers: [
+        containerTemplate(name: 'docker-custom', image: '377225462902.dkr.ecr.us-east-1.amazonaws.com/docker-aws-worker:latest', ttyEnabled: true, command: 'cat'),
+    ],
+    volumes: [
+        hostPathVolume(mountPath: '/var/run/docker.sock', hostPath: '/var/run/docker.sock'),
+    ]
+) {
     node('jenkins-worker') {
-        stage('Check running containers') {
-            container('git') {
-                sh 'git clone https://github.com/ximenasandoval/learning-devops-sample-app.git'
-            }
-            container('python') {
-                dir('learning-devops-sample-app/') {
-                    sh 'ls -a'
-                    sh 'echo This is were a test would be run'
-                }
-            }
-            container('docker') {
-                dir('learning-devops-sample-app/') {
-                    sh 'echo This is were the image will be built'
+        stage('Get a project') {
+            git url: 'https://github.com/ximenasandoval/learning-devops-sample-app.git', branch: 'main'
+            container('docker-custom') {
+                stage('Build image') {
                     sh 'chmod +x deployment/deploy.sh'
-                    sh './deployment/deploy.sh'
+                    sh 'sh deployment/deploy.sh'
                 }
             }
         }
