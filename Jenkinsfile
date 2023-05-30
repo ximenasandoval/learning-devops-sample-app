@@ -1,4 +1,4 @@
-podTemplate(label: 'mypod', containers: [
+podTemplate(label: 'jenkins-worker', containers: [
     containerTemplate(name: 'docker', image: 'docker', command: 'cat', ttyEnabled: true),
     containerTemplate(name: 'git', image: 'alpine/git', ttyEnabled: true, command: 'cat'),
     containerTemplate(name: 'python', image: 'python:3', ttyEnabled: true, command: 'bash')
@@ -7,7 +7,7 @@ podTemplate(label: 'mypod', containers: [
     hostPathVolume(mountPath: '/var/run/docker.sock', hostPath: '/var/run/docker.sock'),
   ]
   ) {
-    node('mypod') {
+    node('jenkins-worker') {
         stage('Check running containers') {
             container('git') {
                 sh 'git clone https://github.com/ximenasandoval/learning-devops-sample-app.git'

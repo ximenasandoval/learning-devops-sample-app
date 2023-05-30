@@ -1,4 +1,4 @@
-FROM python:3 AS base
+FROM python:3.12.0b1-slim-bullseye AS base
 
 WORKDIR /usr/src/app
 
