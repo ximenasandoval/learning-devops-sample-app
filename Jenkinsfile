@@ -21,8 +21,8 @@ podTemplate(label: 'jenkins-worker', containers: [
             container('docker') {
                 dir('learning-devops-sample-app/') {
                     sh 'echo This is were the image will be built'
-                    sh 'docker ps'
-                    sh 'ls -a'
+                    sh 'chmod +x deployment/deploy.sh'
+                    sh './deployment/deploy.sh'
                 }
             }
         }
