@@ -9,6 +9,7 @@ if  [[ -z ${AWS_ACCOUNT_ID+x} ||  -z ${AWS_SECRET_ACCESS_KEY+x} || -z ${AWS_ACCE
 fi
 
 # We need to build the image for the server
+git config --global --add safe.directory '*'
 UNIQ_ID=$(git rev-parse --short HEAD)
 REPO_URI=$AWS_ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/$ECR_REPO_NAME
 tag=$REPO_URI:$UNIQ_ID
