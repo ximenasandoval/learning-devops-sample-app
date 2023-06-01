@@ -30,4 +30,4 @@ echo Clean up images
 
 docker rmi -f $tag $REPO_URI:latest
 
-echo $tag > .version
+echo APP_VERSION=$tag > .version
