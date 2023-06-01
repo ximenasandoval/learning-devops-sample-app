@@ -4,17 +4,16 @@
 if  [[ -z ${AWS_ACCOUNT_ID+x} ||  -z ${AWS_SECRET_ACCESS_KEY+x} || -z ${AWS_ACCESS_KEY_ID+x} ]]; then 
     echo "No env variables, loading from file"
     export $(cat deployment/.env | xargs)
-    # Unset default AWs profile (will delete later)
+    # Unset default AWS profile (will delete later)
     unset AWS_PROFILE
 fi
 
 # We need to build the image for the server
 git config --global --add safe.directory '*'
+
 UNIQ_ID=$(git rev-parse --short HEAD)
 REPO_URI=$AWS_ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/$ECR_REPO_NAME
 tag=$REPO_URI:$UNIQ_ID
-
-echo $tag
 
 docker build -f app/Dockerfile -t $tag app/
 
@@ -30,3 +29,5 @@ docker push $tag
 echo Clean up images
 
 docker rmi -f $tag $REPO_URI:latest
+
+echo $tag > .version
