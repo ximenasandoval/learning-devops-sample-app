@@ -10,13 +10,45 @@ podTemplate(
     ]
 ) {
     node('jenkins-pod-worker') {
-        git url: 'https://github.com/ximenasandoval/learning-devops-sample-app.git', branch: 'main'
         container('docker-custom') {
+            stage('Get app repository') {
+                sh 'git clone https://github.com/ximenasandoval/learning-devops-sample-app.git'
+                sh 'ls'
+                sh 'pwd'
+            }
             stage('Push to ECR') {
-                sh 'chmod +x deployment/deploy.sh'
-                withAWS(credentials: 'aws-ecr-user', region: 'us-east-1') {
-                    withCredentials([string(credentialsId: 'AWS_ACCOUNT_ID', variable: 'AWS_ACCOUNT_ID'), string(credentialsId: 'sample-app-ecr-repo-name', variable: 'ECR_REPO_NAME')]) {
-                        sh 'sh deployment/deploy.sh'
+                dir('learning-devops-sample-app') {
+                    sh 'chmod +x deployment/deploy.sh'
+                    withAWS(credentials: 'aws-ecr-user', region: 'us-east-1') {
+                        withCredentials([string(credentialsId: 'AWS_ACCOUNT_ID', variable: 'AWS_ACCOUNT_ID'), string(credentialsId: 'sample-app-ecr-repo-name', variable: 'ECR_REPO_NAME')]) {
+                            sh 'sh deployment/deploy.sh'
+                        }
+                    }
+                }
+            }
+            stage('Get ArgoCD configuration repository') {
+                sh 'git clone https://github.com/ximenasandoval/learning-devops-argocd-configs'
+            }
+            stage('Update ArgoCD configuration') {
+                dir('learning-devops-argocd-configs') {
+                    withCredentials([gitUsernamePassword(credentialsId: 'XSDH-deployer-credentials', gitToolName: 'Default')]) {
+                        sh '''
+                        export ENVIRONMENT=development
+                        export APP_PATH=sample-app/radio.yml
+                        cat ${ENVIRONMENT}/${APP_PATH}
+                        export CURRENT_VERSION=$(cat ${ENVIRONMENT}/${APP_PATH} | yq ".spec.template.spec.containers[0].image" | sed 's/.*://')
+                        export TARGET_VERSION=$(cat ../learning-devops-sample-app/.version | sed 's/.*://')
+    
+                        sed -i -e "s|$CURRENT_VERSION|$TARGET_VERSION|" ${ENVIRONMENT}/${APP_PATH}
+                        cat ${ENVIRONMENT}/${APP_PATH}
+                        
+                        git config --global user.email "xdh.deployer@gmail.com"
+                        git config --global user.name "xsdh-deployer"
+
+                        git add ${ENVIRONMENT}/${APP_PATH}
+                        git commit -m "Deploy version"
+                        git push
+                        '''
                     }
                 }
             }
