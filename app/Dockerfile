@@ -9,6 +9,6 @@ COPY . .
 
 EXPOSE 5000
 
-ENTRYPOINT [ "python3" ]
+ENTRYPOINT [ "sh" ]
 
-CMD [ "server.py" ]
+CMD [ "entrypoint.sh" ]
